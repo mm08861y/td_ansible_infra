@@ -1,0 +1,34 @@
+---
+- name: Configuration du NAT dynamique (PAT)
+  hosts: csr1000
+  gather_facts: no
+  connection: network_cli
+
+  vars:
+    interfaces_lan:
+      - GigabitEthernet2
+      - GigabitEthernet3
+      - GigabitEthernet4
+
+  tasks:
+    - name: Définir l'interface WAN comme ip nat outside
+      cisco.ios.ios_config:
+        lines:
+          - ip nat outside
+        parents: interface GigabitEthernet1
+
+    - name: Appliquer ip nat inside sur les interfaces LAN
+      include_tasks: set_nat_inside.yml
+      loop: "{{ interfaces_lan }}"
+      loop_control:
+        loop_var: iface
+
+    - name: Créer l'ACL pour autoriser les IPs du LAN
+      cisco.ios.ios_config:
+        lines:
+          - access-list 1 permit 192.168.2.0 0.0.0.255
+
+    - name: Activer le NAT overload
+      cisco.ios.ios_config:
+        lines:
+          - ip nat inside source list 1 interface GigabitEthernet1 overload

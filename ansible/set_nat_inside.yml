@@ -1,0 +1,6 @@
+# set_nat_inside.yml
+- name: Appliquer ip nat inside sur {{ iface }}
+  cisco.ios.ios_config:
+    lines:
+      - ip nat inside
+    parents: "interface {{ iface }}"

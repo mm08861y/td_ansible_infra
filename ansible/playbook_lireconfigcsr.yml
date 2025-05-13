@@ -1,7 +1,8 @@
 ---
-- name: Merge provided configuration with device configuration
+- name: Configuration des interfaces + DHCP
   hosts: csr1000
   gather_facts: no
+  connection: network_cli
 
   tasks:
     - name: Configurer les interfaces
@@ -21,3 +22,21 @@
             ipv4:
               - address: 192.168.4.1/24
         state: merged
+
+    - name: Supprimer le pool DHCP existant (si présent)
+      cisco.ios.ios_config:
+        lines:
+          - no ip dhcp pool LAN_POOL
+
+    - name: Exclure l'adresse du routeur de la plage DHCP
+      cisco.ios.ios_config:
+        lines:
+          - ip dhcp excluded-address 192.168.2.1
+
+    - name: Configurer le pool DHCP
+      cisco.ios.ios_config:
+        lines:
+          - ip dhcp pool LAN_POOL
+          - network 192.168.2.0 255.255.255.0
+          - default-router 192.168.2.1
+          - dns-server 8.8.8.8

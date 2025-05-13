@@ -1,0 +1,21 @@
+---
+- name: Configuration du PAT par port (Port forwarding)
+  hosts: csr1000
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Configurer la redirection du port 80 (HTTP) vers 192.168.3.2:80
+      cisco.ios.ios_config:
+        lines:
+          - ip nat inside source static tcp 192.168.3.2 80 interface GigabitEthernet1 80
+
+    - name: Configurer la redirection du port 2222 (SSH) vers 192.168.4.2:22
+      cisco.ios.ios_config:
+        lines:
+          - ip nat inside source static tcp 192.168.4.2 22 interface GigabitEthernet1 2222
+
+    - name: Vérifier la configuration NAT
+      cisco.ios.ios_command:
+        commands:
+          - show ip nat translations

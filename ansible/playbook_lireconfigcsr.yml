@@ -5,13 +5,28 @@
   connection: network_cli
 
   tasks:
-    - name: Configurer les interfaces
+
+    - name: Configurer GigabitEthernet1 avec IP par DHCP
+      cisco.ios.ios_config:
+        lines:
+          - ip address dhcp
+          - no shutdown
+        parents: interface GigabitEthernet1
+
+    - name: Activer les interfaces 2 à 4
+      cisco.ios.ios_interfaces:
+        config:
+          - name: GigabitEthernet2
+            enabled: true
+          - name: GigabitEthernet3
+            enabled: true
+          - name: GigabitEthernet4
+            enabled: true
+        state: merged
+
+    - name: Configurer les interfaces avec IP fixes
       cisco.ios.ios_l3_interfaces:
         config:
-          - name: GigabitEthernet1
-            ipv4:
-              - address:
-                secondary: true
           - name: GigabitEthernet2
             ipv4:
               - address: 192.168.2.1/24
